@@ -31,7 +31,7 @@ exports.handler = async (event, context) => {
 
     var body = JSON.parse(event.body);
     let author = body.actor.display_name;
-    let summary = body.push.changes[0].new.target.summary.raw;
+    let hash = body.push.changes[0].new.target.hash;
     let message = body.push.changes[0].new.target.message;
     let branchName = body.push.changes[0].new.name;
     let date = body.push.changes[0].new.target.date;
@@ -39,7 +39,7 @@ exports.handler = async (event, context) => {
 
     let richEmbed = new discord.RichEmbed()
         .setColor('#0099ff')
-        .setTitle(summary)
+        .setTitle(hash)
         .setURL(url)
         .setFooter(`Commit pushed to ${branchName} by ${author} on ${date}`)
         .setDescription(message)
