@@ -29,26 +29,34 @@ exports.handler = async (event, context) => {
     
     await client.login(process.env.DACKBOT_BOT_TOKEN);
 
-    var body = JSON.parse(event.body);
-    let author = body.actor.display_name;
-    let hash = body.push.changes[0].new.target.hash;
-    let message = body.push.changes[0].new.target.message;
-    let branchName = body.push.changes[0].new.name;
-    let date = body.push.changes[0].new.target.date;
-    let url = body.push.changes[0].links.html.href;
+    const body = JSON.parse(event.body);
+    const author = body.actor.display_name;
 
-    let richEmbed = new discord.RichEmbed()
+    const channelId = '693596517604524104';
+    const channel = client.channels.get(channelId);
+
+    const title = `${author} pushed to the repository`;
+    const date = body.push.changes[0].new.target.date;
+    const url = body.push.changes[0].links.html.href;
+
+    var message = "";
+    body.push.changes.forEach(change => {
+        const hash = change.new.target.hash.substring(0, 7);
+        const commitMessage = change.new.target.message;
+
+        message += `${hash}:\n ${commitMessage}\n\n`;
+    });
+
+    const richEmbed = new discord.RichEmbed()
         .setColor('#0099ff')
-        .setTitle(hash)
+        .setTitle(title)
         .setURL(url)
         .setFooter(`Commit pushed to ${branchName} by ${author} on ${date}`)
         .setDescription(message)
 
-    let channelId = '693596517604524104';
-    let channel = client.channels.get(channelId);
     await channel.send(richEmbed);
 
-    let response = {
+    const response = {
         'statusCode': 200,
         'body': JSON.stringify({
             message: 'success!'
