@@ -32,6 +32,8 @@ exports.handler = async (event, context) => {
     const body = JSON.parse(event.body);
     const author = body.actor.display_name;
 
+    const branchName = body.push.changes[0].new.name;
+
     const channelId = '693596517604524104';
     const channel = client.channels.get(channelId);
 
