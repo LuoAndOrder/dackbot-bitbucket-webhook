@@ -1,27 +1,8 @@
 const discord = require('discord.js');
+const moment = require('moment-timezone');
 
 const client = new discord.Client();
 
-async function sendMessage(channelId, msg, msgId) {
-    console.log(`[sendMessage] channelId: ${channelId} msg: ${msg}`);
-    let channel = client.channels.get(channelId);
-    if (!channel) {
-        console.log(`[sendMessage] channel not found! ${channelId}`);
-        console.log(JSON.stringify(client.channels));
-        console.log(`Client Status: ${client.status}`);
-    }
-
-    await channel.send(msgId);
-    console.log(`[sendMessage] succesfully sent message`);
-}
-
-const sleep = (milliseconds) => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds))
-  }
-
-const login = (token) => {
-    return new Promise(resolve => client.login(token))
-}
 
 exports.handler = async (event, context) => {
     console.log(event);
@@ -34,7 +15,7 @@ exports.handler = async (event, context) => {
 
     const branchName = body.push.changes[0].new.name;
 
-    const channelId = '693596517604524104';
+    const channelId = process.env.DISCORD_CHANNEL_ID;
     const channel = client.channels.get(channelId);
 
     const title = `${author} pushed to the repository`;
@@ -42,11 +23,12 @@ exports.handler = async (event, context) => {
     const url = body.push.changes[0].links.html.href;
 
     var message = "";
-    body.push.changes.forEach(change => {
-        const hash = change.new.target.hash.substring(0, 7);
-        const commitMessage = change.new.target.message;
+    body.push.changes[0].commits.forEach(change => {
+        const hash = change.hash.substring(0, 7);
+        const datetime = moment(change.date).tz("America/Los_Angeles").format("LLLL");
+        const commitMessage = change.message;
 
-        message += `${hash}:\n ${commitMessage}\n\n`;
+        message += `${datetime}:\n ${commitMessage}\n\n`;
     });
 
     const richEmbed = new discord.RichEmbed()
